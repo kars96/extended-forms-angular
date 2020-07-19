@@ -338,7 +338,7 @@
 
   </div>
   <div [formGroup]="fg">
-  <label>{{fg.get('name').getAttr('label')}}</label>
+  <label>{{fg.get('name').getAttr('label')}}<span *ngIf="fg.get('name').hasActiveValidator('required')">*</span></label>
 <input formControlName="name" [maxlength]="fg.get('name').getAttr('maxLength')" >
 <span class="text-danger" *ngFor="let err of fg.get('name').errorKeys()">
   {{fg.get('name').getError(err)}}

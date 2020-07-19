@@ -91,4 +91,15 @@ export class ExtendedFormControl extends FormControl {
         this.setValidators(validators);
 
     }
+
+    public hasActiveValidator(valName: string): boolean {
+        if(this.metadata.validators) {
+            const validatorMeta = 
+            this.metadata.validators.filter(val => val.active && val.name === valName);
+            if(validatorMeta.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
