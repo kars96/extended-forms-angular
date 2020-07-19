@@ -9,25 +9,16 @@ import { Validators } from '@angular/forms';
 })
 export class AppComponent implements OnInit {
   title = 'extended-forms';
-  constructor(private readonly formBuilder: ExtendedFormBuilder){
+  fg: any;
+  constructor(private readonly formBuilder: ExtendedFormBuilder) {
   }
 
   ngOnInit() {
     console.log(this.formBuilder);
-    let fg = this.formBuilder.group({
-      'name': [
-        ({
-          initialValue: 'karthik',
-          label: 'Name',
-          validators: [{
-            message: 'Name is required',
-            name: 'required'
-          }]
-        } as FormControlMetadata),
-        [Validators.required]
-      ]
+    this.fg = this.formBuilder.group({
+      'name': this.formBuilder.control({ initialValue: '', label: 'Name', maxLength: 4 }, [{ name: 'required', staticMessage: 'Name is Requried', validatorRef: Validators.required }])
     });
-    console.log(fg);
+    console.log(this.fg);
   }
 
 }

@@ -337,7 +337,15 @@
     </svg>
 
   </div>
-
+  <div [formGroup]="fg">
+  <label>{{fg.get('name').getAttr('label')}}</label>
+<input formControlName="name" [maxlength]="fg.get('name').getAttr('maxLength')" >
+<span class="text-danger" *ngFor="let err of fg.get('name').errorKeys()">
+  {{fg.get('name').getError(err)}}
+</span>
+  </div>
+  <span>{{fg.get('name').value | json}}</span>
+  <span>{{fg.get('name').errors | json}}</span>
   <!-- Resources -->
   <h2>Resources</h2>
   <p>Here are some links to help you get started:</p>
