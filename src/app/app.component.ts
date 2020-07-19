@@ -16,8 +16,15 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     console.log(this.formBuilder);
     this.fg = this.formBuilder.group({
-      'name': this.formBuilder.control({ initialValue: '', label: 'Name', maxLength: 4 }, [{ name: 'required', staticMessage: 'Name is Requried', validatorRef: Validators.required }])
-    });
+      'name': {
+        initialValue: '',
+        label: 'Name',
+        maxLength: 4,
+        validators: [{
+          validatorName: 'required',
+          staticMessage: 'Name is required'
+        }]
+      }});
     console.log(this.fg);
   }
 

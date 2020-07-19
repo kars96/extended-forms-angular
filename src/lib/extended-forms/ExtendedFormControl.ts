@@ -12,7 +12,7 @@ export interface FormControlMetadata {
 export interface ValidatorWithMeta {
     validatorRef: ValidatorFn;
     staticMessage: string;
-    name: string;
+    validatorName: string;
     [key: string]: any;
 }
 
@@ -25,23 +25,25 @@ export class ExtendedFormControl extends FormControl {
     metadata: FormControlMetadata;
 
     constructor(formState?: any, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null,
-                asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+        asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
         super(formState, validatorOrOpts, asyncValidator);
     }
     setValidators(newValidator: ValidatorFn | ValidatorFn[] | null | ValidatorWithMeta | ValidatorWithMeta[]): void {
         let validatorFns: ValidatorFn[] = [];
         let validatorMetadata: ValidatorMetadata[] = [];
-        if (newValidator && 'name' in newValidator) {
+        if (newValidator && 'validatorName' in newValidator) {
             // Validatorwithmeta
             validatorFns = [(newValidator as ValidatorWithMeta).validatorRef];
             validatorMetadata.push({ ...(newValidator as ValidatorWithMeta), active: true });
+            this.metadata = { ...this.metadata, validators: validatorMetadata };
         } else if (Array.isArray((newValidator))) {
             // validatorFn[] or ValidaotrWithMeta[]
-            if (newValidator.length > 0 && 'name' in newValidator[0]) {
+            if (newValidator.length > 0 && 'validatorName' in newValidator[0]) {
                 // ValidatorWithMeta[]
                 validatorFns = (newValidator as ValidatorWithMeta[]).map(val => val.validatorRef);
                 validatorMetadata = (newValidator as ValidatorWithMeta[])
                     .map(val => ({ ...(val as ValidatorWithMeta), active: true }));
+                this.metadata = { ...this.metadata, validators: validatorMetadata };
             } else if (newValidator.length > 0) {
                 // ValdiatroFn[]
                 validatorFns = (newValidator as ValidatorFn[]);
@@ -51,12 +53,12 @@ export class ExtendedFormControl extends FormControl {
             // ValidatorFn
             validatorFns = [(newValidator as ValidatorFn)];
         }
-        this.metadata = { ...this.metadata, validators: validatorMetadata };
+
         super.setValidators(validatorFns);
     }
-    
-    
-    public getAttr(attr: string): object  {
+
+
+    public getAttr(attr: string): object {
         return this.metadata[attr];
     }
 
@@ -66,7 +68,7 @@ export class ExtendedFormControl extends FormControl {
             err = errobj.message;
         } else if (errobj && this.metadata.validators) {
             const validatorsMeta = this.metadata.validators.find(
-                validatorMeta => validatorMeta.name === err
+                validatorMeta => validatorMeta.validatorName === err
             );
             if (validatorsMeta) {
                 err = validatorsMeta.staticMessage;
@@ -81,22 +83,22 @@ export class ExtendedFormControl extends FormControl {
 
     public addValidator(validatorMeta: ValidatorWithMeta): void {
         let validators: ValidatorFn[] = [];
-        if(this.metadata.validators) {
+        if (this.metadata.validators) {
             validators = this.metadata.validators.filter(val => val.active).map(val => val.validatorRef);
         } else {
             this.metadata.validators = [];
         }
         validators.push(validatorMeta.validatorRef);
-        this.metadata.validators.push({...validatorMeta, active: true});
+        this.metadata.validators.push({ ...validatorMeta, active: true });
         this.setValidators(validators);
 
     }
 
     public hasActiveValidator(valName: string): boolean {
-        if(this.metadata.validators) {
-            const validatorMeta = 
-            this.metadata.validators.filter(val => val.active && val.name === valName);
-            if(validatorMeta.length > 0) {
+        if (this.metadata.validators) {
+            const validatorMeta =
+                this.metadata.validators.filter(val => val.active && val.validatorName === valName);
+            if (validatorMeta.length > 0) {
                 return true;
             }
         }
