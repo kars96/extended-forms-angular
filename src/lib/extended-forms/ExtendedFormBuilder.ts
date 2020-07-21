@@ -60,7 +60,9 @@ export class ExtendedFormBuilder extends FormBuilder {
         if(formControlMetadata.validators !== null){
 
             formControlMetadata.validators.forEach(val =>{
-                validators.push(this.getValidatorInstance(val));
+                const validatr = this.getValidatorInstance(val);
+                validators.push(validatr);
+                val.validatorRef = validatr;
                 val.active = true;
             } );
         }

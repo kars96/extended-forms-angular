@@ -1,5 +1,6 @@
 
 import { FormControl, ValidatorFn, AbstractControl, AbstractControlOptions, AsyncValidatorFn } from '@angular/forms';
+import { ExtendedValidator } from './ExtendedValidator';
 
 export interface FormControlMetadata {
     initialValue: any;
@@ -38,6 +39,7 @@ export class ExtendedFormControl extends FormControl {
             this.metadata = { ...this.metadata, validators: validatorMetadata };
         } else if (Array.isArray((newValidator))) {
             // validatorFn[] or ValidaotrWithMeta[]
+            console.log(newValidator)
             if (newValidator.length > 0 && 'validatorName' in newValidator[0]) {
                 // ValidatorWithMeta[]
                 validatorFns = (newValidator as ValidatorWithMeta[]).map(val => val.validatorRef);
@@ -78,18 +80,42 @@ export class ExtendedFormControl extends FormControl {
     }
 
     public errorKeys(): string[] {
-        return Object.keys(this.errors);
+        return  this.errors && Object.keys(this.errors);
     }
 
-    public addValidator(validatorMeta: ValidatorWithMeta): void {
+    public addValidator(validatorMeta: ExtendedValidator): void {
         let validators: ValidatorFn[] = [];
         if (this.metadata.validators) {
             validators = this.metadata.validators.filter(val => val.active).map(val => val.validatorRef);
         } else {
             this.metadata.validators = [];
         }
+        console.log(validatorMeta.validatorRef)
         validators.push(validatorMeta.validatorRef);
-        this.metadata.validators.push({ ...validatorMeta, active: true });
+        this.metadata.validators.push({
+            ...validatorMeta,
+            staticMessage: validatorMeta.staticMessage || validatorMeta.validatorName,
+            active: true
+        });
+        this.setValidators(validators);
+
+    }
+
+    public removeValidator(validatorname: string): void {
+        let validators: ValidatorFn[] = [];
+        if (this.metadata.validators) {
+            validators = this.metadata.validators.filter(val => {
+                if(val.active && val.validatorName !== validatorname) {
+                    return true;
+                } else {
+                    val.active = false;
+                    return false;
+                }
+            }).map(val => val.validatorRef);
+        } else {
+            throw new Error('No vaidators present');
+        }
+        
         this.setValidators(validators);
 
     }

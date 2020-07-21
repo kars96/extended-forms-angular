@@ -337,6 +337,8 @@
     </svg>
 
   </div>
+
+
   <div [formGroup]="fg">
   <label>{{fg.get('name').getAttr('label')}}<span *ngIf="fg.get('name').hasActiveValidator('required')">*</span></label>
 <input formControlName="name" [maxlength]="fg.get('name').getAttr('maxLength')" >
@@ -346,6 +348,9 @@
   </div>
   <span>{{fg.get('name').value | json}}</span>
   <span>{{fg.get('name').errors | json}}</span>
+
+
+  
   <!-- Resources -->
   <h2>Resources</h2>
   <p>Here are some links to help you get started:</p>
