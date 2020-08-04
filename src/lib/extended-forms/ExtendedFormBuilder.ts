@@ -63,7 +63,7 @@ export class ExtendedFormBuilder extends FormBuilder {
     controlFromJson(formControlMetadata: FormControlMetadata): ExtendedFormControl {
         const fc = new ExtendedFormControl(formControlMetadata.initialValue);
         const validators = [];
-        if (formControlMetadata.validators !== null) {
+        if (formControlMetadata.validators) {
 
             formControlMetadata.validators.forEach(val => {
                 const validatr = this.getValidatorInstance(val);

@@ -129,7 +129,7 @@ export class ExtendedFormControl extends FormControl {
                 if(val.active) {
                     return true;
                 } else if(val.validatorName === validatorName) {
-                    val.active = false;
+                    val.active = true;
                     return true;
                 }else {
                     return false;
