@@ -32,6 +32,10 @@ export class AppComponent implements OnInit {
     (this.fg.controls.name as ExtendedFormControl).addValidator(ExtendedValidator.create('illegalChar*', this.illegalChar('*')));
   }
 
+  getLabel(control: ExtendedFormControl): string {
+    return control.getAttr('label') as unknown as string;
+  }
+
   public illegalChar(char: string) {
 
     return (control: AbstractControl): IValidationMessage => {

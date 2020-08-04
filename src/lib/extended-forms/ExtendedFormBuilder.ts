@@ -1,4 +1,4 @@
-import { FormBuilder, FormControl, ValidatorFn, AbstractControlOptions, AsyncValidatorFn, Validators, FormGroup, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormControl, ValidatorFn, AbstractControlOptions, AsyncValidatorFn, Validators, FormGroup, AbstractControl, FormArray } from '@angular/forms';
 import { FormControlMetadata, ExtendedFormControl, ValidatorMetadata, ValidatorWithMeta } from './ExtendedFormControl';
 import { Injectable } from '@angular/core';
 
@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
 export class ExtendedFormBuilder extends FormBuilder {
     control(formState: FormControlMetadata, validatorOrOpts?: ValidatorFn | ValidatorFn[] |
         ValidatorWithMeta | ValidatorWithMeta[] | AbstractControlOptions | null,
-        asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null): FormControl {
+            asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null): FormControl {
         let validators: ValidatorFn[] = [];
         let validatorMeta: ValidatorMetadata[] = [];
         if (Array.isArray(validatorOrOpts)) {
@@ -39,13 +39,19 @@ export class ExtendedFormBuilder extends FormBuilder {
 
     public group(root: object): FormGroup {
         let fg;
-        let fcObj: {[key: string]: AbstractControl} = {};
+        const fcObj: { [key: string]: AbstractControl } = {};
         Object.keys(root).forEach(
             key => {
-                if (root[key] && 'initialValue' in root[key]) {
+                if (root[key] && 'label' in root[key]) {
                     // ExtendedFormCOntrol
                     fcObj[key] = this.controlFromJson(root[key]);
-                } else if(root[key]) {
+                } else if (root[key] && root[key] instanceof Array) {
+                    const controlsArr = (root[key] as Array<object>).map(
+                        cont => this.group(cont)
+                    );
+                    fcObj[key] = new FormArray(controlsArr);
+                }
+                else if (root[key]) {
                     // formGroup
                     fcObj[key] = this.group(root[key]);
                 }
@@ -57,14 +63,14 @@ export class ExtendedFormBuilder extends FormBuilder {
     controlFromJson(formControlMetadata: FormControlMetadata): ExtendedFormControl {
         const fc = new ExtendedFormControl(formControlMetadata.initialValue);
         const validators = [];
-        if(formControlMetadata.validators !== null){
+        if (formControlMetadata.validators !== null) {
 
-            formControlMetadata.validators.forEach(val =>{
+            formControlMetadata.validators.forEach(val => {
                 const validatr = this.getValidatorInstance(val);
                 validators.push(validatr);
                 val.validatorRef = validatr;
                 val.active = true;
-            } );
+            });
         }
         fc.setValidators(validators);
         fc.metadata = formControlMetadata;
@@ -76,10 +82,10 @@ export class ExtendedFormBuilder extends FormBuilder {
 
         switch (validatorMeta.validatorName) {
             case 'min':
-                validatorIns = Validators.min(validatorMeta.min);
+                validatorIns = Validators.min(validatorMeta.args[0]);
                 break;
             case 'max':
-                validatorIns = Validators.max(validatorMeta.max);
+                validatorIns = Validators.max(validatorMeta.args[0]);
                 break;
             case 'required':
                 validatorIns = Validators.required;
@@ -91,16 +97,16 @@ export class ExtendedFormBuilder extends FormBuilder {
                 validatorIns = Validators.email;
                 break;
             case 'minLength':
-                validatorIns = Validators.minLength(validatorMeta.minLength);
+                validatorIns = Validators.minLength(validatorMeta.args[0]);
                 break;
             case 'pattern':
-                validatorIns = Validators.pattern(validatorMeta.pattern);
+                validatorIns = Validators.pattern(validatorMeta.args[0]);
                 break;
             case 'nullValidator':
                 validatorIns = Validators.nullValidator;
                 break;
             default:
-                throw new Error(`${validatorMeta.validatorName} doesn;t have a mapped validaotr instance`);
+                throw new Error(`${validatorMeta.validatorName} doesn't have a mapped validaotr instance`);
         }
         return validatorIns;
     }

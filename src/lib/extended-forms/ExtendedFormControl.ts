@@ -6,6 +6,7 @@ export interface FormControlMetadata {
     initialValue: any;
     disabled?: boolean;
     label: string;
+    type: string;
     [key: string]: any;
     validators?: ValidatorMetadata[];
 }
@@ -14,6 +15,7 @@ export interface ValidatorWithMeta {
     validatorRef: ValidatorFn;
     staticMessage: string;
     validatorName: string;
+    args?: any[];
     [key: string]: any;
 }
 
@@ -101,7 +103,7 @@ export class ExtendedFormControl extends FormControl {
 
     }
 
-    public removeValidator(validatorname: string): void {
+    public deactivateValidator(validatorname: string): void {
         let validators: ValidatorFn[] = [];
         if (this.metadata.validators) {
             validators = this.metadata.validators.filter(val => {
@@ -113,13 +115,37 @@ export class ExtendedFormControl extends FormControl {
                 }
             }).map(val => val.validatorRef);
         } else {
-            throw new Error('No vaidators present');
+            throw new Error('No validators present');
         }
         
         this.setValidators(validators);
 
     }
 
+    public activateValidator(validatorName: string) {
+        let validators: ValidatorFn[] = [];
+        if (this.metadata.validators) {
+            validators = this.metadata.validators.filter(val => {
+                if(val.active) {
+                    return true;
+                } else if(val.validatorName === validatorName) {
+                    val.active = false;
+                    return true;
+                }else {
+                    return false;
+                }
+            }).map(val => val.validatorRef);
+        } else {
+            throw new Error('No validators present');
+        }
+        
+        this.setValidators(validators);
+
+    }
+    public clearValidators(): void {
+        this.metadata.validators = [];
+        super.clearValidators();
+    }
     public hasActiveValidator(valName: string): boolean {
         if (this.metadata.validators) {
             const validatorMeta =
